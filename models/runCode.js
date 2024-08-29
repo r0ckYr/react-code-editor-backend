@@ -1,44 +1,43 @@
-const {exec, spawn} = require("child_process");
+const { exec, spawn } = require("child_process");
 const { FILE } = require("dns");
 const fs = require('fs');
 const l = require('../constants/languageOptions');
 const s = require('../constants/statuses');
 
 const DIRECTORY = "./tmp/"
-const FILE_NAME = DIRECTORY+"myFile"
+const FILE_NAME = DIRECTORY + "myFile"
 let processing = true
 
 const commandList = [
     {
         id: 46,
         cmd: `bash ${FILE_NAME}.bash`
-      },
-      {
+    },
+    {
         id: 48,
         cmd: `gcc -o ${FILE_NAME} ${FILE_NAME}.c && ./tmp/myFile`
-      },
-      {
+    },
+    {
         id: 52,
         cmd: `g++ -o ${FILE_NAME} ${FILE_NAME}.cpp && ./tmp/myFile`
-      },
-      {
+    },
+    {
         id: 60,
         cmd: `go run ${FILE_NAME}.go`
-      },
-      {
+    },
+    {
         id: 62,
-        cmd: `javac ${FILE_NAME}.java && ls tmp/ | grep '\.class' | sed 's/\.class//g' | xargs -I{} sh -c "cd tmp;java {};rm {}.class;cd .."` 
-      },
-      {
+        cmd: `javac ${FILE_NAME}.java && ls tmp/ | grep '\.class' | sed 's/\.class//g' | xargs -I{} sh -c "cd tmp;java {};rm {}.class;cd .."`
+    },
+    {
         id: 71,
         cmd: `python3 ${FILE_NAME}.python`
-      },
+    },
 ]
 
 
 var compileCode = async (languageId, cmd, res, response) => {
-    try
-    {
+    try {
         var start = new Date().getTime();
         console.log("start")
         exec(cmd, (error, stdout, stderr) => {
@@ -66,8 +65,7 @@ var compileCode = async (languageId, cmd, res, response) => {
                 console.log(response)
                 res.send(response)
             }
-            else
-            {
+            else {
                 console.log(`stdout: ${stdout}`);
                 processing = false
                 response.stderr = error
@@ -79,29 +77,26 @@ var compileCode = async (languageId, cmd, res, response) => {
             }
         });
     }
-    catch(e)
-    {
+    catch (e) {
         console.log(e)
         processing = false
         return [e, 69, null]
     }
 
-} 
+}
 
 
 var compileCode2 = async (languageId, cmd, res, response, stdInput) => {
-    try
-    {
+    try {
         var start = new Date().getTime();
         console.log("start")
-        var process = spawn(cmd, {shell: true})
-        stdInput  = stdInput.split('\n')
+        var process = spawn(cmd, { shell: true })
+        stdInput = stdInput.split('\n')
         console.log(stdInput);
-        for(var i=0;i<stdInput.length;i++)
-        {
-            if(stdInput[i].length > 0)
+        for (var i = 0; i < stdInput.length; i++) {
+            if (stdInput[i].length > 0)
                 process.stdin.write(stdInput[i])
-        } 
+        }
         process.stdin.end()
         process.stderr.on('data', (data) => {
             console.log(`stderr: ${data}`);
@@ -112,7 +107,7 @@ var compileCode2 = async (languageId, cmd, res, response, stdInput) => {
             response.compile_output = btoa(encodeURI(data))
             console.log(response)
             res.send(response)
-        })  
+        })
         process.stdout.on('data', (data) => {
             console.log(`stdout: ${data}`);
             response.stderr = ""
@@ -123,8 +118,7 @@ var compileCode2 = async (languageId, cmd, res, response, stdInput) => {
             res.send(response)
         })
     }
-    catch(e)
-    {
+    catch (e) {
         console.log(e)
         processing = false
         return [e, 69, null]
@@ -134,33 +128,27 @@ var compileCode2 = async (languageId, cmd, res, response, stdInput) => {
 
 const writeCode = (code, extension) => {
     try {
-    fs.writeFileSync(`${FILE_NAME}.${extension}`, code);
-    return null;
-    // file written successfully
+        fs.writeFileSync(`${FILE_NAME}.${extension}`, code);
+        return null;
+        // file written successfully
     } catch (err) {
-    console.error(err);
-    return err;
-}
+        console.error(err);
+        return err;
+    }
 }
 
-const getExtension = (languageId) =>
-{
-    for (var i=0;i<l.languageOptions.length;i++)
-    {
-        if(languageId===l.languageOptions[i].id)
-        {
+const getExtension = (languageId) => {
+    for (var i = 0; i < l.languageOptions.length; i++) {
+        if (languageId === l.languageOptions[i].id) {
             return l.languageOptions[i].value;
         }
     }
     return null;
 }
 
-const getCommand = (languageId) =>
-{
-    for (var i=0;i<commandList.length;i++)
-    {
-        if(languageId===commandList[i].id)
-        {
+const getCommand = (languageId) => {
+    for (var i = 0; i < commandList.length; i++) {
+        if (languageId === commandList[i].id) {
             return commandList[i].cmd;
         }
     }
@@ -168,12 +156,9 @@ const getCommand = (languageId) =>
 }
 
 
-const setDescription = (statusID) =>
-{
-    for (var i=0;i<s.statuses.length;i++)
-    {
-        if(statusID===s.statuses[i].id)
-        {
+const setDescription = (statusID) => {
+    for (var i = 0; i < s.statuses.length; i++) {
+        if (statusID === s.statuses[i].id) {
             return s.statuses[i].description;
         }
     }
@@ -181,14 +166,14 @@ const setDescription = (statusID) =>
 }
 
 
-var runCode = async (req, res) =>{
+var runCode = async (req, res) => {
     const response = {
         status: {
             id: 3,
             description: null
         },
-        memory: "1234kB",
-        time: "12s",
+        memory: "0kB",
+        time: "0s",
         stdout: null,
         stderr: "Error",
         compile_output: req.body.source_code
@@ -198,23 +183,20 @@ var runCode = async (req, res) =>{
     const languageId = req.body.language_id;
     const code = atob(req.body.source_code)
     var stdInput = ""
-    if (req.body.stdin.length>0)
+    if (req.body.stdin.length > 0)
         var stdInput = atob(req.body.stdin)
     const languageExtension = getExtension(languageId);
 
     //write code to a file
     const fileError = writeCode(code, languageExtension)
-    if(fileError)
-    {
+    if (fileError) {
         console.log("return error code")
     }
     var cmd = getCommand(languageId)
-    if(stdInput.length>0)
-    {
+    if (stdInput.length > 0) {
         compileCode2(languageId, cmd, res, response, stdInput);
     }
-    else
-    {
+    else {
         compileCode(languageId, cmd, res, response);
     }
 }
