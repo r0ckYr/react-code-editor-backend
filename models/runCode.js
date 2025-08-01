@@ -4,7 +4,7 @@ const fs = require('fs');
 const l = require('../constants/languageOptions');
 const s = require('../constants/statuses');
 
-const DIRECTORY = "./tmp/"
+const DIRECTORY = "/tmp/"
 const FILE_NAME = DIRECTORY+"myFile"
 let processing = true
 
@@ -15,11 +15,11 @@ const commandList = [
       },
       {
         id: 48,
-        cmd: `gcc -o ${FILE_NAME} ${FILE_NAME}.c && ./tmp/myFile`
+        cmd: `gcc -o ${FILE_NAME} ${FILE_NAME}.c && /tmp/myFile`
       },
       {
         id: 52,
-        cmd: `g++ -o ${FILE_NAME} ${FILE_NAME}.cpp && ./tmp/myFile`
+        cmd: `g++ -o ${FILE_NAME} ${FILE_NAME}.cpp && /tmp/myFile`
       },
       {
         id: 60,
