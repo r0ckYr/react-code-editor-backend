@@ -41,6 +41,13 @@ const languageOptions = [
     label: "Python (3.8.1)",
     value: "python",
   },
+  {
+    id: 72,
+    name: "Python (3.8.1)",
+    label: "Python (3.8.1)",
+    value: "python",
+  },
+
 ];
 
 
